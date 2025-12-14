@@ -1,11 +1,11 @@
 {
-    "name": "TailwindBreakpointResizer",
+    "name": "tailwind-breakpoint-resizer",
     "private": true,
     "version": "0.0.0",
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "tsc -b && vite build",
+        "build": "vite build && vite build --config vite.content.config.ts",
         "lint": "eslint .",
         "preview": "vite preview"
     },

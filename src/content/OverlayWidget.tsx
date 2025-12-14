@@ -18,25 +18,72 @@ function useViewportSize(): Size {
     return size;
 }
 
+const formatNumber = (n: number): string => {
+    const rounded = Math.round(n * 100) / 100;
+    return Number.isInteger(rounded) ? `${rounded}` : rounded.toFixed(2);
+};
+
+const gcd = (a: number, b: number): number => {
+    while (b !== 0) [a, b] = [b, a % b];
+    return Math.abs(a);
+};
+
+const commonRatios: [number, number][] = [
+    [1, 1],
+    [5, 4],
+    [4, 3],
+    [7, 5],
+    [3, 2],
+    [2, 1],
+    [16, 10],
+    [16, 9],
+    [21, 9],
+    [32, 9],
+    [1.85, 1],
+    [2.35, 1],
+    [2.39, 1],
+    [2.76, 1],
+    [18, 9],
+    [19.5, 9],
+    [20, 9],
+];
+
+export const getAspectRatio = (width: number, height: number): string => {
+    if (height === 0) throw new Error("Height cannot be zero");
+
+    const d = gcd(width, height);
+    let w = width / d;
+    let h = height / d;
+
+    const ratio = w / h;
+    const tolerance = 0.01;
+
+    for (const [cw, ch] of commonRatios) {
+        const common = cw / ch;
+        if (Math.abs(ratio - common) < tolerance) {
+            return `${formatNumber(cw)}:${formatNumber(ch)}`;
+        }
+    }
+
+    if (w > 50) {
+        return `${formatNumber(width / height)}:1`;
+    }
+
+    return `${formatNumber(w)}:${formatNumber(h)}`;
+};
+
 export function OverlayWidget(): React.JSX.Element {
     const { w, h } = useViewportSize();
     const bp = getBreakpointName(w);
+    const ar = getAspectRatio(w, h);
 
     return (
-        <div className="fixed bottom-3 left-3 z-2147483647 select-none">
-            <div className="rounded-xl border border-white/10 bg-black/75 px-3 py-2 text-white shadow-lg backdrop-blur">
-                <div className="text-xs opacity-80">Viewport</div>
-                <div className="text-sm font-semibold tabular-nums">
-                    {w} × {h}
-                </div>
-                <div className="mt-1 inline-flex items-center gap-2">
-                    <span className="rounded-md bg-white/10 px-2 py-0.5 text-xs font-medium">
-                        {bp}
-                    </span>
-                    <span className="text-xs opacity-70">
-                        dpr {Number(window.devicePixelRatio || 1).toFixed(2)}
-                    </span>
-                </div>
+        <div className="tw-resizer-widget">
+            <div className="tw-resizer-widget-line">
+                <span>
+                    {w} × {h} ({ar})
+                </span>
+                <span className="tw-resizer-widget-badge">{bp}</span>
             </div>
         </div>
     );

@@ -4,6 +4,9 @@ import path from "node:path";
 
 export default defineConfig({
     plugins: [react()],
+    resolve: {
+        dedupe: ["react", "react-dom", "react-dom/client"],
+    },
     build: {
         outDir: "dist",
         emptyOutDir: true,
@@ -11,13 +14,12 @@ export default defineConfig({
             input: {
                 devtools: path.resolve(__dirname, "devtools.html"),
                 panel: path.resolve(__dirname, "panel.html"),
-                content: path.resolve(__dirname, "src/content/content-script.tsx"),
+                popup: path.resolve(__dirname, "popup.html"),
+                background: path.resolve(__dirname, "src/background.ts"),
             },
             output: {
-                entryFileNames: (chunk) => {
-                    if (chunk.name === "content") return "content-script.js";
-                    return "[name].js";
-                },
+                entryFileNames: (chunk) =>
+                    chunk.name === "background" ? "background.js" : "[name].js",
             },
         },
     },
