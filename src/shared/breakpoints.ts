@@ -15,3 +15,12 @@ export function getBreakpointName(width: number): BreakpointName {
     }
     return current;
 }
+
+export type EmulationState = {
+    active: boolean;
+    width?: number;
+    height?: number;
+    scale?: number;
+    positionX?: number;
+    reason?: string;
+};

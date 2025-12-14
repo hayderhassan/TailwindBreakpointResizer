@@ -1,12 +1,19 @@
 import * as React from "react";
 import { createRoot, Root } from "react-dom/client";
-import { OverlayWidget } from "./OverlayWidget";
 import tailwindCss from "../styles/tailwind.css?inline";
+import { OverlayWidget } from "./OverlayWidget";
+import type { EmulationState } from "../shared/breakpoints";
 
 const HOST_ID = "tw-resize-overlay-host";
 
 let root: Root | null = null;
-let visible = true;
+
+// UI visibility
+let overlayVisible = true;
+let toolbarVisible = true;
+
+// Emulation state (driven by background)
+let emulationState: EmulationState = { active: false };
 
 function ensureMounted(): HTMLDivElement {
     let host = document.getElementById(HOST_ID) as HTMLDivElement | null;
@@ -26,39 +33,83 @@ function ensureMounted(): HTMLDivElement {
         shadow.appendChild(app);
 
         root = createRoot(app);
-        root.render(
-            <React.StrictMode>
-                <OverlayWidget />
-            </React.StrictMode>,
-        );
     }
 
     return host;
 }
 
-function setVisible(next: boolean): void {
+function render() {
     const host = ensureMounted();
-    visible = next;
-    host.style.display = visible ? "" : "none";
+    host.style.display = overlayVisible ? "" : "none";
+
+    root?.render(
+        <React.StrictMode>
+            <OverlayWidget
+                emulation={emulationState}
+                overlayVisible={overlayVisible}
+                toolbarVisible={toolbarVisible && emulationState.active}
+                onToolbarHide={() => {
+                    toolbarVisible = false;
+                    render();
+                }}
+                onApplyWidth={(width) => {
+                    chrome.runtime.sendMessage({ type: "RESIZE_APPLY", payload: { width } });
+                }}
+                onReset={() => {
+                    chrome.runtime.sendMessage({ type: "RESIZE_RESET" });
+                }}
+            />
+        </React.StrictMode>,
+    );
+}
+
+function setOverlayVisible(next: boolean): void {
+    overlayVisible = next;
+    render();
+}
+
+function setToolbarVisible(next: boolean): void {
+    toolbarVisible = next;
+    render();
+}
+
+function setEmulationState(next: EmulationState): void {
+    emulationState = next;
+    // When emulation becomes active, ensure toolbar is visible again (nice UX)
+    if (next.active) toolbarVisible = true;
+    render();
 }
 
 ensureMounted();
+render();
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg?.type === "OVERLAY_SET_VISIBLE") {
-        setVisible(Boolean(msg.visible));
-        sendResponse({ ok: true, visible });
+        setOverlayVisible(Boolean(msg.visible));
+        sendResponse({ ok: true, visible: overlayVisible });
         return true;
     }
 
     if (msg?.type === "OVERLAY_TOGGLE") {
-        setVisible(!visible);
-        sendResponse({ ok: true, visible });
+        setOverlayVisible(!overlayVisible);
+        sendResponse({ ok: true, visible: overlayVisible });
         return true;
     }
 
     if (msg?.type === "OVERLAY_GET_STATE") {
-        sendResponse({ ok: true, visible });
+        sendResponse({ ok: true, visible: overlayVisible });
+        return true;
+    }
+
+    if (msg?.type === "TOOLBAR_SET_VISIBLE") {
+        setToolbarVisible(Boolean(msg.visible));
+        sendResponse({ ok: true, visible: toolbarVisible });
+        return true;
+    }
+
+    if (msg?.type === "EMULATION_STATE") {
+        setEmulationState(msg.state as EmulationState);
+        sendResponse({ ok: true });
         return true;
     }
 

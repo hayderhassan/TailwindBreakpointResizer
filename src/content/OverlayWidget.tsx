@@ -1,5 +1,6 @@
 import * as React from "react";
-import { getBreakpointName } from "../shared/breakpoints";
+import { getBreakpointName, type EmulationState } from "../shared/breakpoints";
+import { ResponsiveToolbar } from "./ResponsiveToolbar";
 
 type Size = { w: number; h: number };
 
@@ -17,6 +18,15 @@ function useViewportSize(): Size {
 
     return size;
 }
+
+type Props = {
+    emulation: EmulationState;
+    overlayVisible: boolean;
+    toolbarVisible: boolean;
+    onToolbarHide: () => void;
+    onApplyWidth: (width: number) => void;
+    onReset: () => void;
+};
 
 const formatNumber = (n: number): string => {
     const rounded = Math.round(n * 100) / 100;
@@ -72,19 +82,49 @@ export const getAspectRatio = (width: number, height: number): string => {
     return `${formatNumber(w)}:${formatNumber(h)}`;
 };
 
-export function OverlayWidget(): React.JSX.Element {
+export function OverlayWidget({
+    emulation,
+    overlayVisible,
+    toolbarVisible,
+    onToolbarHide,
+    onApplyWidth,
+    onReset,
+}: Props): React.JSX.Element {
     const { w, h } = useViewportSize();
     const bp = getBreakpointName(w);
     const ar = getAspectRatio(w, h);
 
+    if (!overlayVisible) return <></>;
+
     return (
-        <div className="tw-resizer-widget">
-            <div className="tw-resizer-widget-line">
-                <span>
-                    {w} × {h} ({ar})
-                </span>
-                <span className="tw-resizer-widget-badge">{bp}</span>
+        <>
+            {toolbarVisible ? (
+                <ResponsiveToolbar
+                    state={emulation}
+                    onHide={onToolbarHide}
+                    onApplyWidth={onApplyWidth}
+                    onReset={onReset}
+                />
+            ) : null}
+
+            <div className="tw-resizer-widget">
+                <div className="tw-resizer-widget-line">
+                    <span>
+                        {w} × {h} ({ar})
+                    </span>
+                    <span className="tw-resizer-widget-badge">{bp}</span>
+                </div>
+                {emulation.active ? (
+                    <div className="mt-2 text-[11px] opacity-70">
+                        Emulation active{" "}
+                        {typeof emulation.scale === "number" ? (
+                            <span className="tabular-nums">
+                                · scale {emulation.scale.toFixed(3)}
+                            </span>
+                        ) : null}
+                    </div>
+                ) : null}
             </div>
-        </div>
+        </>
     );
 }
