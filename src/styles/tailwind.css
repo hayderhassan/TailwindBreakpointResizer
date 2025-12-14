@@ -1,22 +1,2 @@
 @import "tailwindcss";
-
-@layer components {
-  .tw-resizer-widget {
-    @apply fixed left-2 bottom-2 px-2 py-1.5 z-2147483647
-           bg-[rgba(2,6,23,0.8)] shadow-[0_4px_10px_rgba(0,0,0,0.25)]
-           text-slate-50 text-[12px]/[1.3] font-sans
-           border border-[rgba(148,163,184,0.5)] rounded-md
-           pointer-events-auto cursor-pointer;
-  }
-
-  .tw-resizer-widget-line {
-    @apply flex gap-1.5;
-  }
-
-  .tw-resizer-widget-badge {
-    @apply inline-block px-1.5 py-0.5
-           bg-[#312e81]
-           text-indigo-100 font-semibold
-           rounded-full;
-  }
-}
+@import "overlay.css"

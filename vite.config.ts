@@ -12,14 +12,14 @@ export default defineConfig({
         emptyOutDir: true,
         rollupOptions: {
             input: {
-                devtools: path.resolve(__dirname, "devtools.html"),
-                panel: path.resolve(__dirname, "panel.html"),
                 popup: path.resolve(__dirname, "popup.html"),
                 background: path.resolve(__dirname, "src/background.ts"),
             },
             output: {
-                entryFileNames: (chunk) =>
-                    chunk.name === "background" ? "background.js" : "[name].js",
+                entryFileNames: (chunk) => {
+                    if (chunk.name === "background") return "background.js";
+                    return "[name].js";
+                },
             },
         },
     },

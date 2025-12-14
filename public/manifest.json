@@ -1,24 +1,33 @@
 {
-  "manifest_version": 3,
-  "name": "Tailwind Breakpoint Resizer",
-  "version": "0.1.0",
-  "description": "Resize viewport to Tailwind breakpoints + show live overlay in the page.",
-  "permissions": ["debugger", "storage", "tabs"],
-  "host_permissions": ["<all_urls>"],
-  "background": {
-    "service_worker": "background.js",
-    "type": "module"
-  },
-  "action": {
-    "default_title": "TW Resize",
-    "default_popup": "popup.html"
-  },
-  "devtools_page": "devtools.html",
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content-script.js"],
-      "run_at": "document_idle"
-    }
-  ]
+    "manifest_version": 3,
+    "name": "Tailwind Breakpoint Resizer",
+    "version": "0.1.0",
+    "description": "Resize viewport to Tailwind breakpoints + show live overlay in the page.",
+    "permissions": [
+        "debugger",
+        "storage",
+        "tabs"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+    "action": {
+        "default_title": "TW Resize",
+        "default_popup": "popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content-script.js"
+            ],
+            "run_at": "document_idle"
+        }
+    ]
 }
